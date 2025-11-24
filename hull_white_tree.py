@@ -5,10 +5,11 @@ We build the tree for an auxiliary process R* (or x̃) following:
 
     dR* = -a R* dt + sigma dz
 
-In the energy context of Clewlow & Strickland, this R* can be interpreted as the
-zero-mean part of x(t) = ln S(t), i.e. the logarithm of the spot price after a
-time-dependent shift alpha(t). The first stage only cares about the OU dynamics;
-it does NOT depend on whether we are modelling interest rates or oil.
+In the energy context of Clewlow & Strickland, this R* is the zero-mean part of
+x(t) = ln S(t), i.e. the logarithm of the oil spot price after a time-dependent
+shift alpha(t). The first stage only cares about the OU dynamics; the structure
+is agnostic to the commodity, but this implementation is written with oil in
+mind.
 
 Grid spacing is DeltaR = sigma * sqrt(3 * dt). Branching follows the three
 regimes from Hull-White (central, lower, upper) to keep probabilities positive.
@@ -16,8 +17,8 @@ regimes from Hull-White (central, lower, upper) to keep probabilities positive.
 The class also provides a calibration hook for the "second stage", where an
 offset alpha(t) is solved so that the tree matches an external curve (for
 example, an oil futures curve). The calibration is generic: you can plug any
-curve and customize the alpha solver / pricing equation (for bonds, futures,
-etc.) via the alpha_solver / discount_factor_fn hooks.
+curve and customize the alpha solver / pricing equation via the
+alpha_solver / discount_factor_fn hooks.
 """
 
 from __future__ import annotations
@@ -179,7 +180,7 @@ class OilTrinomialTree:
         Probabilities for the three branches, matching the first two moments.
 
         These follow Hull & White section 30.7 with DeltaR = sigma * sqrt(3*dt),
-        and are valid for any OU process (rates, log spot, etc.).
+        and are valid for any OU process (log spot, gas storage factors, etc.).
         """
         aj_dt = a * j * dt
         a2j2_dt2 = (a * a) * (j * j) * (dt * dt)
@@ -221,8 +222,9 @@ class OilTrinomialTree:
                 - If it is callable: curve(t) should return the target at
                   continuous time t (e.g. forward/futures or discount factor).
 
-                For oil, this can be a futures curve F(0, T). For rates, it can
-                be discount factors P(0, T).
+                For oil, this can be a futures curve F(0, T). It can also be
+                repurposed for other markets by supplying the relevant target
+                curve.
 
             alpha_solver:
                 Optional callable to compute alpha_m given (Q_level, target,
@@ -237,13 +239,15 @@ class OilTrinomialTree:
 
             discount_factor_fn:
                 Optional callable returning a “discount factor” applied when
-                propagating from node j over one step. In the rate case this is
-                exp(-(alpha_m + j DeltaR)*dt). For oil, you might set this to
-                1.0 (no discounting) or include an interest-rate term if needed.
+                propagating from node j over one step. The default mirrors the
+                Hull–White bond setup (exp(-(alpha_m + j DeltaR)*dt)). For oil,
+                you might set this to 1.0 (no discounting) or include a
+                financing term if needed.
 
         Returns:
             (alphas, q_levels) where q_levels are the propagated weights
-            (state-price-like in the rate case; probabilities × discounts).
+            (state-price-like when using bond-style discounting; probabilities ×
+            discounts).
         """
         target_lookup = self._curve_lookup(curve)
 
@@ -331,9 +335,6 @@ class OilTrinomialTree:
     def adjusted_factor(self, time_index: int, j: int) -> float:
         """
         Return the “shifted” factor at node (time_index, j).
-
-        In rates:
-            r = alpha(time_index) + R*.
 
         In oil (log-spot model):
             x = alpha(time_index) + R*,

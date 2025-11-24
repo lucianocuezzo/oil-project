@@ -37,7 +37,7 @@ class TreePlotter:
             for node in level.values()
         }
 
-    def _rate_label(self, time_index: int, j: int) -> str:
+    def _factor_label(self, time_index: int, j: int) -> str:
         if not self.tree.alphas:
             return f"j={j}"
         # Last level has no alpha entry; reuse last known alpha for display.
@@ -49,7 +49,7 @@ class TreePlotter:
         self,
         ax=None,
         annotate_probs: bool = False,
-        annotate_rates: bool = False,
+        annotate_factors: bool = False,
         title: str | None = None,
     ):
         try:
@@ -71,9 +71,9 @@ class TreePlotter:
         ys = [p[1] for p in positions.values()]
         ax.scatter(xs, ys, color="black", zorder=3)
 
-        if annotate_rates:
+        if annotate_factors:
             for (i, j), (x, y) in positions.items():
-                ax.text(x, y, self._rate_label(i, j), ha="center", va="bottom", fontsize=8, color="darkblue")
+                ax.text(x, y, self._factor_label(i, j), ha="center", va="bottom", fontsize=8, color="darkblue")
 
         ax.set_xlabel("time step")
         ax.set_ylabel("j index" if self.y_axis == "j" else "R*")
