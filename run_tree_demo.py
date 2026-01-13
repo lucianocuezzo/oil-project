@@ -45,7 +45,7 @@ def main() -> None:
             children_text = f"children={node.children}"
             x_adj = shifted_tree.adjusted_factor(node.time_index, node.j)
             print(
-                f"  (i={node.time_index}, j={node.j:2d}, R*={node.r_star: .5f}, "
+                f"  (i={node.time_index}, j={node.j:2d}, x~={node.x_tilde: .5f}, "
                 f"x_adj={x_adj: .5f}, S=exp(x_adj)={math.exp(x_adj):.5f}) "
                 f"[{node.branch_type:7s}] {probs_text}; {children_text}"
             )
