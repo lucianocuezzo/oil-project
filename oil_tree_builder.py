@@ -43,11 +43,11 @@ class OilTrinomialTreeBuilder:
                 branch = self._branch_type(j, jmin, jmax)
                 probs = self._probabilities(branch, self.a, self.dt, j)
                 children = self._children_for_branch(branch, j)
-                r_star = j * delta_x
+                x_tilde = j * delta_x
                 level_nodes[j] = Node(
                     time_index=i,
                     j=j,
-                    r_star=r_star,
+                    x_tilde=x_tilde,
                     branch_type=branch,
                     children=children,
                     probabilities=probs,

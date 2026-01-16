@@ -34,7 +34,7 @@ class Node:
 
     time_index: int
     j: int
-    r_star: float         # R* value at this node (e.g. contribution to log-spot)
+    x_tilde: float        # x~ value at this node (zero-mean contribution to log-spot)
     branch_type: str      # "central", "lower", "upper"
     children: Branch      # child j-indices (up, mid, down)
     probabilities: Probabilities  # (pu, pm, pd)
