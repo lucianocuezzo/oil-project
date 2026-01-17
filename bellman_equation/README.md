@@ -11,7 +11,7 @@ Switching costs are paid immediately when taking the action; the cashflow that s
 
 Files
 - params.py: SwitchingParams with costs, discounting, and cashflow helpers.
-- solver.py: SwitchingBellmanSolver doing backward induction over a BaseOilTrinomialTree or ShiftedOilTrinomialTree.
+- solver.py: SwitchingBellmanSolver doing backward induction over a BaseOilTrinomialTree or ShiftedOilTrinomialTree. Includes a pre-invest state (wait vs invest) with CAPEX.
 - run_bellman_demo.py: runnable example wiring the solver to the existing tree builder and a mock futures curve.
 
 Run the demo from the repo root:

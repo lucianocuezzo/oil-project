@@ -14,6 +14,8 @@ class SwitchingParams:
     fixed_off_cost: float
     switch_on_cost: float
     switch_off_cost: float
+    capex: float = 0.0
+    allow_start_on: bool = True
 
     def cashflow_on(self, price: float) -> float:
         margin = (price - self.variable_cost) * self.production_rate

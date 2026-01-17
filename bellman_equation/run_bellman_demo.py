@@ -22,6 +22,8 @@ from bellman_equation.solver import SwitchingBellmanSolver, default_price_fn
 
 
 def main() -> None:
+    enable_plot = True  # set False to skip plotting
+
     n_steps = 6
     dt = 0.25  # quarters
     a = 0.6
@@ -41,6 +43,8 @@ def main() -> None:
         fixed_off_cost=1.0,
         switch_on_cost=8.0,
         switch_off_cost=4.0,
+        capex=1.0,
+        allow_start_on=True,
     )
 
     # Salvage value at horizon: e.g., shutdown and scrap payoff proportional to price.
@@ -62,8 +66,10 @@ def main() -> None:
     print("\n--- Project value (includes optimal switching and salvage) ---")
     print(f"Start ON : {solution.value_on[0][root_j]:.4f}")
     print(f"Start OFF: {solution.value_off[0][root_j]:.4f}")
+    print(f"Start Uninvested: {solution.value_pre[0][root_j]:.4f}")
     print(f"Recommended first action if ON : {solution.policy_on[0][root_j]}")
     print(f"Recommended first action if OFF: {solution.policy_off[0][root_j]}")
+    print(f"Recommended first action if Uninvested: {solution.policy_pre[0][root_j]}")
 
     levels_to_show = min(2, n_steps - 1)
     print("\nFirst levels: t, j, P, V_on, V_off, policy_on, policy_off")
@@ -89,6 +95,75 @@ def main() -> None:
             f"V_on={solution.value_on[terminal_level][j]:8.4f}, "
             f"V_off={solution.value_off[terminal_level][j]:8.4f}"
         )
+
+    if enable_plot:
+        try:
+            import matplotlib.pyplot as plt
+
+            _plot_values(
+                tree=shifted_tree,
+                solution=solution,
+                title="Value evolution per mode (time on x-axis)",
+            )
+            _plot_policy_regions(
+                tree=shifted_tree,
+                solution=solution,
+                price_fn=default_price_fn,
+                title="Policy regions (color = action)",
+            )
+            plt.tight_layout()
+            plt.show(block=False)  # non-blocking; close windows manually when done
+        except Exception as exc:  # plot is optional
+            print(f"\nPlot skipped: {exc}")
+
+
+def _plot_values(tree, solution, title: str = "") -> None:
+    import matplotlib.pyplot as plt
+
+    modes = [
+        ("Uninvested", solution.value_pre, "tab:blue"),
+        ("OFF", solution.value_off, "tab:orange"),
+        ("ON", solution.value_on, "tab:green"),
+    ]
+
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4), sharex=True)
+    for ax, (label, values, color) in zip(axes, modes):
+        for t, level in enumerate(tree.levels):
+            xs = [t] * len(level)
+            ys = [values[t][j] for j in level]
+            ax.scatter(xs, ys, s=25, color=color, alpha=0.7, label=f"t={t}")
+        ax.set_title(label)
+        ax.set_xlabel("time step")
+        ax.set_ylabel("value")
+        ax.grid(True, linestyle="--", alpha=0.3)
+        ax.legend(title="time index", fontsize=8)
+    fig.suptitle(title or "Value evolution")
+
+
+def _plot_policy_regions(tree, solution, price_fn, title: str = "") -> None:
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+
+    mode_policies = [
+        ("Uninvested", solution.policy_pre, {"wait": "tab:blue", "invest_off": "tab:orange", "invest_on": "tab:green"}),
+        ("OFF", solution.policy_off, {"stay_off": "tab:blue", "switch_on": "tab:green"}),
+        ("ON", solution.policy_on, {"stay_on": "tab:green", "switch_off": "tab:red"}),
+    ]
+
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4), sharex=True)
+    for ax, (label, policies, cmap) in zip(axes, mode_policies):
+        for t, level in enumerate(tree.levels[:-1]):  # policies defined up to n_steps-1
+            for j in level:
+                action = policies[t][j]
+                price = price_fn(tree, t, j)
+                ax.scatter(t, price, color=cmap.get(action, "gray"), s=25, alpha=0.9)
+        ax.set_title(label)
+        ax.set_xlabel("time step")
+        ax.set_ylabel("price")
+        ax.grid(True, linestyle="--", alpha=0.3)
+        legend_handles = [Patch(color=color, label=action) for action, color in cmap.items()]
+        ax.legend(handles=legend_handles, title="action", fontsize=8)
+    fig.suptitle(title or "Policy regions")
 
 
 if __name__ == "__main__":
