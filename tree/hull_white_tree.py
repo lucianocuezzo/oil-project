@@ -91,7 +91,7 @@ class BaseOilTrinomialTree:
         This keeps the tree class focused on calibration/pricing logic while
         the builder encapsulates the Hull-White branching rules.
         """
-        from oil_tree_builder import OilTrinomialTreeBuilder
+        from .oil_tree_builder import OilTrinomialTreeBuilder
 
         builder = OilTrinomialTreeBuilder(
             n_steps=n_steps,

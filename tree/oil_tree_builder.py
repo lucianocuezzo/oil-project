@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from typing import Dict, List
 
-from hull_white_tree import BaseOilTrinomialTree, Branch, Node, Probabilities
+from .hull_white_tree import BaseOilTrinomialTree, Branch, Node, Probabilities
 
 
 class OilTrinomialTreeBuilder:

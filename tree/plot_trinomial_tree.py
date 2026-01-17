@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Dict, Tuple, Union
 
-from hull_white_tree import BaseOilTrinomialTree, Probabilities, ShiftedOilTrinomialTree
+from .hull_white_tree import BaseOilTrinomialTree, Probabilities, ShiftedOilTrinomialTree
 
 TreeLike = Union[BaseOilTrinomialTree, ShiftedOilTrinomialTree]
 

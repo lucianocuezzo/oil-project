@@ -3,8 +3,8 @@ from __future__ import annotations
 import math
 from typing import Dict, List
 
-from hull_white_tree import BaseOilTrinomialTree, ShiftedOilTrinomialTree
-from oil_futures_curve import FuturesCurve
+from .hull_white_tree import BaseOilTrinomialTree, ShiftedOilTrinomialTree
+from .oil_futures_curve import FuturesCurve
 
 
 class OilTrinomialFuturesCalibrator:
