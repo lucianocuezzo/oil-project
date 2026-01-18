@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Callable
 
 
-class PolicyPlotter:
+class BellmanPolicyPlotter:
     """Scatter plot of policy regions (action vs time/price) for each mode."""
 
     def __init__(

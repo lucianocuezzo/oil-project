@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 
-class ValuePlotter:
+class BellmanValuePlotter:
     """Scatter plot of value vs time for each operating mode."""
 
     def __init__(self, tree: Any, solution: Any, title: str = "Value evolution per mode") -> None:

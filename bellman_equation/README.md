@@ -13,7 +13,7 @@ Files
 - params.py: SwitchingParams with costs, discounting, and cashflow helpers.
 - solver.py: SwitchingBellmanSolver doing backward induction over a BaseOilTrinomialTree or ShiftedOilTrinomialTree. Includes a pre-invest state (wait vs invest) with CAPEX.
 - run_bellman_demo.py: runnable example wiring the solver to the existing tree builder and a mock futures curve.
-- plots/: ValuePlotter and PolicyPlotter classes (value vs time and policy regions), used by the demo for visualization.
+- Plotting lives in the top-level `plots/` package (BellmanValuePlotter, BellmanPolicyPlotter, plus a TreePlotter re-export).
 
 Run the demo from the repo root:
 

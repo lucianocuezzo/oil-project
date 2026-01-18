@@ -19,7 +19,7 @@ from tree.oil_futures_curve import FuturesCurve
 
 from bellman_equation.params import SwitchingParams
 from bellman_equation.solver import SwitchingBellmanSolver, default_price_fn
-from bellman_equation.plots import ValuePlotter, PolicyPlotter
+from plots import BellmanValuePlotter, BellmanPolicyPlotter
 
 
 def main() -> None:
@@ -44,7 +44,7 @@ def main() -> None:
         fixed_off_cost=1.0,
         switch_on_cost=8.0,
         switch_off_cost=4.0,
-        capex=1.0,
+        capex=60.0,
         allow_start_on=True,
     )
 
@@ -101,8 +101,8 @@ def main() -> None:
         try:
             import matplotlib.pyplot as plt
 
-            ValuePlotter(tree=shifted_tree, solution=solution, title="Value evolution per mode (time on x-axis)").plot()
-            PolicyPlotter(tree=shifted_tree, solution=solution, price_fn=default_price_fn, title="Policy regions (color = action)").plot()
+            BellmanValuePlotter(tree=shifted_tree, solution=solution, title="Value evolution per mode (time on x-axis)").plot()
+            BellmanPolicyPlotter(tree=shifted_tree, solution=solution, price_fn=default_price_fn, title="Policy regions (color = action)").plot()
             plt.tight_layout()
             plt.show(block=False)  # non-blocking; close windows manually when done
         except Exception as exc:  # plot is optional
