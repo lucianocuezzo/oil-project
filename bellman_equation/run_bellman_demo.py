@@ -19,6 +19,7 @@ from tree.oil_futures_curve import FuturesCurve
 
 from bellman_equation.params import SwitchingParams
 from bellman_equation.solver import SwitchingBellmanSolver, default_price_fn
+from bellman_equation.plots import ValuePlotter, PolicyPlotter
 
 
 def main() -> None:
@@ -100,70 +101,12 @@ def main() -> None:
         try:
             import matplotlib.pyplot as plt
 
-            _plot_values(
-                tree=shifted_tree,
-                solution=solution,
-                title="Value evolution per mode (time on x-axis)",
-            )
-            _plot_policy_regions(
-                tree=shifted_tree,
-                solution=solution,
-                price_fn=default_price_fn,
-                title="Policy regions (color = action)",
-            )
+            ValuePlotter(tree=shifted_tree, solution=solution, title="Value evolution per mode (time on x-axis)").plot()
+            PolicyPlotter(tree=shifted_tree, solution=solution, price_fn=default_price_fn, title="Policy regions (color = action)").plot()
             plt.tight_layout()
             plt.show(block=False)  # non-blocking; close windows manually when done
         except Exception as exc:  # plot is optional
             print(f"\nPlot skipped: {exc}")
-
-
-def _plot_values(tree, solution, title: str = "") -> None:
-    import matplotlib.pyplot as plt
-
-    modes = [
-        ("Uninvested", solution.value_pre, "tab:blue"),
-        ("OFF", solution.value_off, "tab:orange"),
-        ("ON", solution.value_on, "tab:green"),
-    ]
-
-    fig, axes = plt.subplots(1, 3, figsize=(12, 4), sharex=True)
-    for ax, (label, values, color) in zip(axes, modes):
-        for t, level in enumerate(tree.levels):
-            xs = [t] * len(level)
-            ys = [values[t][j] for j in level]
-            ax.scatter(xs, ys, s=25, color=color, alpha=0.7, label=f"t={t}")
-        ax.set_title(label)
-        ax.set_xlabel("time step")
-        ax.set_ylabel("value")
-        ax.grid(True, linestyle="--", alpha=0.3)
-        ax.legend(title="time index", fontsize=8)
-    fig.suptitle(title or "Value evolution")
-
-
-def _plot_policy_regions(tree, solution, price_fn, title: str = "") -> None:
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import Patch
-
-    mode_policies = [
-        ("Uninvested", solution.policy_pre, {"wait": "tab:blue", "invest_off": "tab:orange", "invest_on": "tab:green"}),
-        ("OFF", solution.policy_off, {"stay_off": "tab:blue", "switch_on": "tab:green"}),
-        ("ON", solution.policy_on, {"stay_on": "tab:green", "switch_off": "tab:red"}),
-    ]
-
-    fig, axes = plt.subplots(1, 3, figsize=(12, 4), sharex=True)
-    for ax, (label, policies, cmap) in zip(axes, mode_policies):
-        for t, level in enumerate(tree.levels[:-1]):  # policies defined up to n_steps-1
-            for j in level:
-                action = policies[t][j]
-                price = price_fn(tree, t, j)
-                ax.scatter(t, price, color=cmap.get(action, "gray"), s=25, alpha=0.9)
-        ax.set_title(label)
-        ax.set_xlabel("time step")
-        ax.set_ylabel("price")
-        ax.grid(True, linestyle="--", alpha=0.3)
-        legend_handles = [Patch(color=color, label=action) for action, color in cmap.items()]
-        ax.legend(handles=legend_handles, title="action", fontsize=8)
-    fig.suptitle(title or "Policy regions")
 
 
 if __name__ == "__main__":
