@@ -65,7 +65,8 @@ def main() -> None:
         import matplotlib.pyplot as plt
 
         plt.tight_layout()
-        plt.show()
+        plt.show(block=False)  # non-blocking; plots stay open until closed
+        plt.pause(0.1)  # give GUI a moment to render
     except RuntimeError as exc:
         print(f"Plot skipped: {exc}")
 

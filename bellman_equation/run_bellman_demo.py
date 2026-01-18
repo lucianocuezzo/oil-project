@@ -104,7 +104,8 @@ def main() -> None:
             BellmanValuePlotter(tree=shifted_tree, solution=solution, title="Value evolution per mode (time on x-axis)").plot()
             BellmanPolicyPlotter(tree=shifted_tree, solution=solution, price_fn=default_price_fn, title="Policy regions (color = action)").plot()
             plt.tight_layout()
-            plt.show(block=False)  # non-blocking; close windows manually when done
+            plt.show(block=False)  # non-blocking; plots stay open until you close them
+            plt.pause(0.1)  # allow GUI event loop to draw before script exits
         except Exception as exc:  # plot is optional
             print(f"\nPlot skipped: {exc}")
 
