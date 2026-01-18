@@ -67,7 +67,7 @@ class SwitchingBellmanSolver:
             price = self.price_fn(self.tree, last_idx, j)
             value_on[last_idx][j] = self.terminal_on(price)
             value_off[last_idx][j] = self.terminal_off(price)
-            value_pre[last_idx][j] = 0.0
+            value_pre[last_idx][j] = 0.0 #you never invested
 
         for t in reversed(range(n_steps)):
             level = self.tree.levels[t]

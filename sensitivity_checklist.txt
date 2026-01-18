@@ -1,0 +1,43 @@
+Sensitivity checklist (thesis)
+------------------------------
+
+Price curve
+- Shift futures curve up/down.
+- Steepen/flatten contango/backwardation.
+
+Volatility
+- Sigma low vs high to show option value of waiting/switching.
+
+Discount rate
+- Lower vs higher; effect on triggers and NPVs.
+
+Costs
+- Variable cost, fixed ON cost.
+- Fixed OFF cost.
+- Switch_on / switch_off costs.
+- Capex.
+- Salvage on/off and higher/lower.
+
+Operational flex
+- Allow immediate start ON vs force start OFF/Pre.
+- Switching costs: zero, realistic, high.
+- Horizon/time step: shorter vs longer horizon; finer dt.
+
+Model calibration
+- Lattice bounds (jmax/jmin): check convergence of tree-expected NPV/Bellman.
+- Mean reversion (a): slower/faster; effect on price distribution.
+
+Comparative benchmarks
+- Static NPV (invest now, no wait/no switching).
+- NPV with invest-later option (no switching).
+- Bellman (full switching and timing).
+- Sigma = 0 vs base sigma.
+
+Scenario stress (optional)
+- Price jump/drop scenarios.
+- Rate/price co-movements if relevant.
+
+Reporting
+- Root values and recommended first action.
+- Investment triggers over time for each model.
+- ON/OFF policy regions for key sigma/cost scenarios.

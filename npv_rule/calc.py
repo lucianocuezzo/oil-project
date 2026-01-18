@@ -4,6 +4,7 @@ import math
 from dataclasses import dataclass
 from typing import Callable, List, Sequence
 
+from shared.operating_params import BaseOperatingParams
 from tree.hull_white_tree import ShiftedOilTrinomialTree
 from tree.oil_futures_curve import FuturesCurve
 
@@ -12,18 +13,8 @@ PricePath = Sequence[float] | Callable[[float], float]
 
 
 @dataclass(frozen=True)
-class NPVParams:
-    dt: float
-    discount_rate: float
-    production_rate: float
-    variable_cost: float
-    fixed_on_cost: float
-    capex: float
-    salvage_multiplier: float = 0.0  # salvage = multiplier * price at horizon
-
-    @property
-    def discount_factor(self) -> float:
-        return math.exp(-self.discount_rate * self.dt)
+class NPVParams(BaseOperatingParams):
+    """Operating parameters for deterministic NPV (no switching)."""
 
 
 class ForwardNPVCalculator:
@@ -41,7 +32,7 @@ class ForwardNPVCalculator:
     def npv_from_step(self, start_step: int) -> float:
         n_steps = len(self.prices)
         beta = self.params.discount_factor
-        npv = -self.params.capex * (beta ** start_step)
+        npv = -(self.params.capex + self.params.switch_on_cost) * (beta ** start_step)
 
         for idx in range(start_step, n_steps):
             price = self.prices[idx]
@@ -61,6 +52,10 @@ class ForwardNPVCalculator:
             if v >= 0:
                 return k
         return None
+
+    def invest_now_npv(self) -> float:
+        """NPV if you must decide at t=0 to invest or never invest."""
+        return self.npv_from_step(0)
 
 
 class TreeNPVCalculator:
@@ -89,7 +84,7 @@ class TreeNPVCalculator:
     def npv_from_step(self, start_step: int) -> float:
         n_steps = self.tree.n_steps
         beta = self.params.discount_factor
-        npv = -self.params.capex * (beta ** start_step)
+        npv = -(self.params.capex + self.params.switch_on_cost) * (beta ** start_step)
 
         for idx in range(start_step, n_steps):
             expected_p = self._expected_price_at_level(idx + 1)  # prices are for step idx+1
@@ -110,3 +105,7 @@ class TreeNPVCalculator:
             if v >= 0:
                 return k
         return None
+
+    def invest_now_npv(self) -> float:
+        """NPV if you must decide at t=0 to invest or never invest."""
+        return self.npv_from_step(0)

@@ -28,6 +28,35 @@ class OilTrinomialTreeBuilder:
     def build(self) -> BaseOilTrinomialTree:
         """Create and return a BaseOilTrinomialTree instance."""
         self._validate_inputs()
+
+        # Degenerate deterministic case: sigma = 0 -> single path at j=0
+        if self.sigma == 0:
+            delta_x = 0.0
+            levels: List[Dict[int, Node]] = []
+            for i in range(self.n_steps + 1):
+                levels.append(
+                    {
+                        0: Node(
+                            time_index=i,
+                            j=0,
+                            x_tilde=0.0,
+                            branch_type="central",
+                            children=(0, 0, 0),
+                            probabilities=(0.0, 1.0, 0.0),
+                        )
+                    }
+                )
+            return BaseOilTrinomialTree(
+                n_steps=self.n_steps,
+                a=self.a,
+                sigma=self.sigma,
+                dt=self.dt,
+                delta_x=delta_x,
+                jmin=0,
+                jmax=0,
+                levels=levels,
+            )
+
         jmax, jmin = self._resolve_bounds()
 
         delta_x = self.sigma * math.sqrt(3.0 * self.dt)
@@ -69,8 +98,10 @@ class OilTrinomialTreeBuilder:
     def _validate_inputs(self) -> None:
         if self.n_steps < 1:
             raise ValueError("n_steps must be at least 1")
-        if self.a <= 0 or self.sigma <= 0 or self.dt <= 0:
-            raise ValueError("a, sigma, and dt must be positive")
+        if self.a <= 0 or self.dt <= 0:
+            raise ValueError("a and dt must be positive")
+        if self.sigma < 0:
+            raise ValueError("sigma must be non-negative")
 
     def _resolve_bounds(self) -> tuple[int, int]:
         # If boundaries not supplied, use Hull-White threshold
