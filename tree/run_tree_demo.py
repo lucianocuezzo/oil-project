@@ -14,7 +14,7 @@ from .hull_white_tree import _format_probabilities
 from .oil_futures_curve import FuturesCurve
 from .oil_tree_builder import OilTrinomialTreeBuilder
 from .oil_tree_calibrator import OilTrinomialFuturesCalibrator
-from .plot_trinomial_tree import TreePlotter
+from plots.tree_plot import TreePlotter
 
 
 def main() -> None:
