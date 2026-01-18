@@ -24,6 +24,7 @@ from plots import BellmanValuePlotter, BellmanPolicyPlotter
 
 def main() -> None:
     enable_plot = True  # set False to skip plotting
+    block_plots = True  # True keeps windows open (blocking); False is non-blocking/auto-close when script exits
 
     n_steps = 6
     dt = 0.25  # quarters
@@ -32,20 +33,20 @@ def main() -> None:
 
     base_tree = OilTrinomialTreeBuilder(n_steps=n_steps, a=a, sigma=sigma, dt=dt).build()
 
-    futures_curve = FuturesCurve(lambda t: math.exp(0.01 * t))
+    futures_curve = FuturesCurve(lambda t: 75 *math.exp(0.01 * t))
     shifted_tree = OilTrinomialFuturesCalibrator(base_tree, futures_curve).calibrate()
 
     params = SwitchingParams(
         dt=dt,
         discount_rate=0.05,
-        production_rate=1.0,
-        variable_cost=35.0,
+        production_rate=100.0,
+        variable_cost=5.0,
         fixed_on_cost=5.0,
         fixed_off_cost=1.0,
         switch_on_cost=8.0,
         switch_off_cost=4.0,
-        capex=60.0,
-        allow_start_on=True,
+        capex=11.0,
+        allow_start_on=False,  # force start from Uninvested (no immediate ON start)
     )
 
     # Salvage value at horizon: e.g., shutdown and scrap payoff proportional to price.
@@ -64,13 +65,9 @@ def main() -> None:
     solution = solver.solve()
 
     root_j = 0
-    print("\n--- Project value (includes optimal switching and salvage) ---")
-    print(f"Start ON : {solution.value_on[0][root_j]:.4f}")
-    print(f"Start OFF: {solution.value_off[0][root_j]:.4f}")
+    print("\n--- Project value assuming you start Uninvested (must decide to invest) ---")
     print(f"Start Uninvested: {solution.value_pre[0][root_j]:.4f}")
-    print(f"Recommended first action if ON : {solution.policy_on[0][root_j]}")
-    print(f"Recommended first action if OFF: {solution.policy_off[0][root_j]}")
-    print(f"Recommended first action if Uninvested: {solution.policy_pre[0][root_j]}")
+    print(f"Recommended first action: {solution.policy_pre[0][root_j]}")
 
     levels_to_show = min(2, n_steps - 1)
     print("\nFirst levels: t, j, P, V_on, V_off, policy_on, policy_off")
@@ -104,8 +101,11 @@ def main() -> None:
             BellmanValuePlotter(tree=shifted_tree, solution=solution, title="Value evolution per mode (time on x-axis)").plot()
             BellmanPolicyPlotter(tree=shifted_tree, solution=solution, price_fn=default_price_fn, title="Policy regions (color = action)").plot()
             plt.tight_layout()
-            plt.show(block=False)  # non-blocking; plots stay open until you close them
-            plt.pause(0.1)  # allow GUI event loop to draw before script exits
+            if block_plots:
+                plt.show()  # blocking: windows stay until closed
+            else:
+                plt.show(block=False)
+                plt.pause(0.1)  # allow GUI event loop to draw before script exits
         except Exception as exc:  # plot is optional
             print(f"\nPlot skipped: {exc}")
 
