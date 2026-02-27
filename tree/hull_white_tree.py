@@ -139,7 +139,9 @@ class ShiftedOilTrinomialTree:
         return self.base_tree.jmax
 
     def adjusted_factor(self, time_index: int, j: int) -> float:
-        alpha_idx = min(time_index, len(self.alphas) - 1)
+        # alphas[m] calibrates level m+1, so for level t we need alphas[t-1].
+        # Clamp to [0, len-1]: t=0 falls back to alphas[0] (level-1 shift).
+        alpha_idx = min(max(time_index - 1, 0), len(self.alphas) - 1)
         return self.alphas[alpha_idx] + j * self.delta_x
 
 

@@ -1,5 +1,5 @@
 """
-Tree-based NPV demo (invest-now vs invest-later) plus Bellman value with switching.
+NPV (forward and tree) vs Bellman: invest-now vs invest-later and switching.
 
 Run from repo root:
     python run_project_valuation_demo.py
@@ -17,7 +17,7 @@ if str(ROOT) not in sys.path:
 
 from bellman_equation.params import SwitchingParams
 from bellman_equation.solver import SwitchingBellmanSolver, default_price_fn
-from npv_rule.calc import NPVParams, TreeNPVCalculator
+from npv_rule.calc import ForwardNPVCalculator, NPVParams, TreeNPVCalculator
 from tree.oil_futures_curve import FuturesCurve
 from tree.oil_tree_builder import OilTrinomialTreeBuilder
 from tree.oil_tree_calibrator import OilTrinomialFuturesCalibrator
@@ -45,12 +45,19 @@ def main() -> None:
         salvage_multiplier=0.0,
     )
 
+    # Forward-curve NPV (strip, deterministic path)
+    npv_params = NPVParams(**common)
+    fwd_calc = ForwardNPVCalculator(futures_curve, n_steps=n_steps, params=npv_params)
+    fwd_npvs = fwd_calc.npv_schedule()
+    fwd_invest_step = ForwardNPVCalculator.earliest_invest_step(fwd_npvs)
+    fwd_invest_now = fwd_calc.invest_now_npv()
+
     # Tree NPV (no flexibility beyond invest timing)
     npv_params = NPVParams(**common)
     calc = TreeNPVCalculator(shifted_tree, params=npv_params)
-    npvs = calc.npv_schedule()  # invest at step k (wait k*dt, then run ON)
-    invest_step = TreeNPVCalculator.earliest_invest_step(npvs)
-    invest_now = calc.invest_now_npv()
+    tree_npvs = calc.npv_schedule()  # invest at step k (wait k*dt, then run ON)
+    tree_invest_step = TreeNPVCalculator.earliest_invest_step(tree_npvs)
+    tree_invest_now = calc.invest_now_npv()
 
     # Bellman with switching/investment flexibility
     bellman_params = SwitchingParams(
@@ -70,20 +77,51 @@ def main() -> None:
     bellman_value = bellman_solution.value_pre[0][0]
     bellman_action = bellman_solution.policy_pre[0][0]
 
-    _print_results(dt, npvs, invest_step, invest_now, bellman_value, bellman_action)
+    _print_results(
+        dt,
+        fwd_npvs,
+        fwd_invest_step,
+        fwd_invest_now,
+        tree_npvs,
+        tree_invest_step,
+        tree_invest_now,
+        bellman_value,
+        bellman_action,
+    )
 
 
-def _print_results(dt, npvs, invest_step, invest_now, bellman_value, bellman_action):
-    print("=== NPV (tree expected, invest step vs now) ===")
-    print(f" Invest now (t=0): NPV = {invest_now:.4f} -> {'invest' if invest_now >= 0 else 'do not invest'}")
+def _print_results(
+    dt,
+    fwd_npvs,
+    fwd_invest_step,
+    fwd_invest_now,
+    tree_npvs,
+    tree_invest_step,
+    tree_invest_now,
+    bellman_value,
+    bellman_action,
+):
+    print("=== NPV (forward curve, no flexibility) ===")
+    print(f" Invest now (t=0): NPV = {fwd_invest_now:.4f} -> {'invest' if fwd_invest_now >= 0 else 'do not invest'}")
     print(" NPV by invest step (wait k*dt then invest and run ON):")
-    for k, v in enumerate(npvs):
-        tag = " <= earliest >=0" if invest_step is not None and k == invest_step else ""
+    for k, v in enumerate(fwd_npvs):
+        tag = " <= earliest >=0" if fwd_invest_step is not None and k == fwd_invest_step else ""
         print(f"   step {k}: NPV = {v:.4f}{tag}")
-    if invest_step is None:
+    if fwd_invest_step is None:
         print(" Earliest >=0: none within horizon")
     else:
-        print(f" Earliest >=0: step {invest_step} (t={invest_step*dt:.2f}y)")
+        print(f" Earliest >=0: step {fwd_invest_step} (t={fwd_invest_step*dt:.2f}y)")
+
+    print("\n=== NPV (tree expected, no flexibility beyond invest timing) ===")
+    print(f" Invest now (t=0): NPV = {tree_invest_now:.4f} -> {'invest' if tree_invest_now >= 0 else 'do not invest'}")
+    print(" NPV by invest step (wait k*dt then invest and run ON):")
+    for k, v in enumerate(tree_npvs):
+        tag = " <= earliest >=0" if tree_invest_step is not None and k == tree_invest_step else ""
+        print(f"   step {k}: NPV = {v:.4f}{tag}")
+    if tree_invest_step is None:
+        print(" Earliest >=0: none within horizon")
+    else:
+        print(f" Earliest >=0: step {tree_invest_step} (t={tree_invest_step*dt:.2f}y)")
 
     print("\n=== Bellman (with switching) ===")
     print(f" Start uninvested value: {bellman_value:.4f}")
