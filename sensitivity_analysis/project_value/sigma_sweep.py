@@ -120,15 +120,15 @@ def _plot_results(sigmas, npv_now, b_noswitch, b_full, inv_option, op_option) ->
     except Exception:
         return
     try:
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
 
         # --- Left: project value ---
         ax1.plot(sigmas, npv_now,    marker="^", linestyle="--", color="steelblue",   label="Valuación con NPV")
         ax1.plot(sigmas, b_noswitch, marker="o", linestyle="-",  color="darkorange",  label="Valuación con NPV + Opción Inv.")
         ax1.plot(sigmas, b_full,     marker="s", linestyle="-",  color="seagreen",    label="Valuación con NPV + Opción Inv. + Opción Op.")
         ax1.axhline(0, color="black", linewidth=0.7, linestyle=":")
-        ax1.set_xlabel(r"$\sigma$ (volatilidad)")
-        ax1.set_ylabel("Valor del proyecto  $V$")
+        ax1.set_xlabel(r"Volatilidad  $\sigma$")
+        ax1.set_ylabel(r"Valor del proyecto  $V$  (u.m.)")
         ax1.set_title("Valor del proyecto vs volatilidad")
         ax1.grid(True, linestyle="--", alpha=0.35)
         ax1.legend(fontsize=8)
@@ -139,8 +139,8 @@ def _plot_results(sigmas, npv_now, b_noswitch, b_full, inv_option, op_option) ->
         ax2.plot(sigmas, op_option,  marker="s", linestyle="-", color="seagreen",
                  label="Opción Operacional")
         ax2.axhline(0, color="black", linewidth=0.7, linestyle=":")
-        ax2.set_xlabel(r"$\sigma$ (volatilidad)")
-        ax2.set_ylabel("Valor de la opción")
+        ax2.set_xlabel(r"Volatilidad  $\sigma$")
+        ax2.set_ylabel(r"Valor de la opción  (u.m.)")
         ax2.set_title("Valor de las opciones vs volatilidad")
         ax2.grid(True, linestyle="--", alpha=0.35)
         ax2.legend(fontsize=8)

@@ -122,18 +122,18 @@ def run_mean_reversion_sweep(
 
     if enable_plot:
         _plot_results(a_list, npv_now_list, b_noswitch_list, b_full_list,
-                      inv_option_list, op_option_list, sigma)
+                      inv_option_list, op_option_list)
 
 
 def _plot_results(
-    a_vals, npv_now, b_noswitch, b_full, inv_option, op_option, sigma: float
+    a_vals, npv_now, b_noswitch, b_full, inv_option, op_option
 ) -> None:
     try:
         import matplotlib.pyplot as plt
     except Exception:
         return
     try:
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
 
         # --- Izquierda: valor del proyecto ---
         ax1.plot(a_vals, npv_now,    marker="^", linestyle="--", color="steelblue",
@@ -143,8 +143,8 @@ def _plot_results(
         ax1.plot(a_vals, b_full,     marker="s", linestyle="-",  color="seagreen",
                  label="Valuación con NPV + Opción Inv. + Opción Op.")
         ax1.axhline(0, color="black", linewidth=0.7, linestyle=":")
-        ax1.set_xlabel(r"Velocidad de reversión a la media  $a$")
-        ax1.set_ylabel("Valor del proyecto  $V$")
+        ax1.set_xlabel(r"Reversión a la media  $a$  (año$^{-1}$)")
+        ax1.set_ylabel(r"Valor del proyecto  $V$  (u.m.)")
         ax1.set_title("Valor del proyecto vs reversión a la media")
         ax1.grid(True, linestyle="--", alpha=0.35)
         ax1.legend(fontsize=8)
@@ -155,16 +155,13 @@ def _plot_results(
         ax2.plot(a_vals, op_option,  marker="s", linestyle="-", color="seagreen",
                  label="Opción Operacional")
         ax2.axhline(0, color="black", linewidth=0.7, linestyle=":")
-        ax2.set_xlabel(r"Velocidad de reversión a la media  $a$")
-        ax2.set_ylabel("Valor de la opción")
+        ax2.set_xlabel(r"Reversión a la media  $a$  (año$^{-1}$)")
+        ax2.set_ylabel(r"Valor de la opción  (u.m.)")
         ax2.set_title("Valor de las opciones vs reversión a la media")
         ax2.grid(True, linestyle="--", alpha=0.35)
         ax2.legend(fontsize=8)
 
-        plt.suptitle(
-            rf"Sensibilidad a la reversión a la media  ($\sigma$={sigma:.2f})",
-            fontsize=11, y=1.01
-        )
+        plt.suptitle("Sensibilidad a la reversión a la media", fontsize=11, y=1.01)
         plt.tight_layout()
         plt.show(block=False)
     except Exception as exc:

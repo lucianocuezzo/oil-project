@@ -1,10 +1,11 @@
 """
-Capex sensitivity: how the investment entry trigger S*_invest(t) shifts with capex.
+Sensibilidad del umbral de inversión S*_invest al capex.
 
-Plot: entry trigger price vs capex, one line per reference time.
+Para cada valor de capex resuelve Bellman y lee el precio de entrada óptimo
+en tres momentos de referencia (t = 1, 5, 9 años).
 
-Run from repo root:
-    python sensitivity_analysis/capex_sweep.py
+Ejecutar desde la raíz del repositorio:
+    python optimal_path/trigger_capex_sweep.py
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-REF_TIMES = [1.0, 5.0, 9.0]   # years at which to read the trigger
+REF_TIMES = [1.0, 5.0, 9.0]   # años en que se lee el trigger
 
 from bellman_equation.params import SwitchingParams
 from bellman_equation.solver import SwitchingBellmanSolver, default_price_fn
@@ -28,12 +29,12 @@ from tree.oil_tree_builder import OilTrinomialTreeBuilder
 from tree.oil_tree_calibrator import OilTrinomialFuturesCalibrator
 
 
-def run_capex_sweep(capex_values: Iterable[float], enable_plot: bool = True) -> None:
+def run_trigger_capex_sweep(capex_values: Iterable[float], enable_plot: bool = True) -> None:
     n_steps = 80
     dt = 10.0 / n_steps   # 0.125
     a = 0.6
     sigma = 0.2
-    futures_curve = FuturesCurve(lambda t: 72.0 + 12.0 * math.exp(-0.5 * t))  # backwardation: spot=84, floor=72 (breakeven=70)
+    futures_curve = FuturesCurve(lambda t: 72.0 + 12.0 * math.exp(-0.5 * t))
 
     base_params = dict(
         dt=dt,
@@ -48,7 +49,7 @@ def run_capex_sweep(capex_values: Iterable[float], enable_plot: bool = True) -> 
         allow_start_on=True,
     )
 
-    # Build tree once (same for all capex values)
+    # Árbol construido una sola vez (es el mismo para todos los capex)
     builder = OilTrinomialTreeBuilder(n_steps=n_steps, a=a, sigma=sigma, dt=dt, jmax=9, jmin=-9)
     shifted_tree = OilTrinomialFuturesCalibrator(builder.build(), futures_curve).calibrate()
 
@@ -68,7 +69,6 @@ def run_capex_sweep(capex_values: Iterable[float], enable_plot: bool = True) -> 
 
         _, inv_trig, _, _ = extract_trigger_curves(shifted_tree, solution, dt)
 
-        # Collect trigger at each reference time
         trigger_at: dict[float, float | None] = {}
         for t_ref in REF_TIMES:
             step = int(t_ref / dt)
@@ -84,6 +84,18 @@ def run_capex_sweep(capex_values: Iterable[float], enable_plot: bool = True) -> 
 
     if enable_plot:
         _plot_results(results)
+
+
+def _npv_threshold(capex, variable_cost=65.0, fixed_on_cost=5.0,
+                   switch_on_cost=5.0, discount_rate=0.08,
+                   n_steps=80, dt=0.125, production_rate=1.0) -> float:
+    """Precio de entrada implícito por la regla del VAN (VAN = 0)."""
+    r = discount_rate
+    if r == 0:
+        annuity = n_steps * dt * production_rate
+    else:
+        annuity = dt * (1 - math.exp(-r * n_steps * dt)) / (1 - math.exp(-r * dt)) * production_rate
+    return variable_cost + fixed_on_cost + (capex + switch_on_cost) / annuity
 
 
 def _plot_results(results) -> None:
@@ -108,18 +120,36 @@ def _plot_results(results) -> None:
             ax.plot(cx, tv, marker="o", linewidth=1.8, color=color,
                     label=f"Año {t_ref:.0f}")
 
-        ax.set_xlabel("Capex")
-        ax.set_ylabel(r"Precio de entrada óptimo  $S^*_{invest}$")
-        ax.set_title(r"Precio de entrada vs Capex  ($\sigma$=0.20)")
+        # Umbral VAN: S* tal que VAN = 0 (no opcionalidad)
+        npv_thresh = [_npv_threshold(capex=c) for c in capex_vals]
+        ax.plot(capex_vals, npv_thresh, color="dimgray", linewidth=1.4,
+                linestyle="--", label=r"Umbral VAN  (VAN = 0)")
+
+        ax.set_xlabel(r"Capex  (u.m.)")
+        ax.set_ylabel(r"Precio de entrada óptimo  $S^*_{invest}$  (\$/bbl)")
+        ax.set_title("Umbral de inversión vs Capex")
         ax.grid(True, linestyle="--", alpha=0.35)
         ax.legend(title="Año de referencia", fontsize=8)
 
         plt.tight_layout()
-        plt.show()
+        plt.show(block=False)
     except Exception as exc:
         print(f"\nPlot skipped: {exc}")
 
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
+    OUTPUT_DIR = pathlib.Path(r"C:\Users\lucia\OneDrive\Documentos\tesis\sensibilidades\optimal_path")
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
     capex_values = [5.0, 10.0, 15.0, 20.0, 30.0, 40.0, 50.0]
-    run_capex_sweep(capex_values)
+    run_trigger_capex_sweep(capex_values)
+
+    figs = plt.get_fignums()
+    if figs:
+        path = OUTPUT_DIR / "trigger_capex_sweep.png"
+        plt.figure(figs[-1]).savefig(path, dpi=300, bbox_inches="tight")
+        print(f"  → guardado: {path}")
+
+    input("\nPresioná Enter para cerrar...")

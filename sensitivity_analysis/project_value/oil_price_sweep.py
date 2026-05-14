@@ -137,7 +137,7 @@ def _plot_results(spots, npv_now, b_noswitch, b_full, inv_option, op_option) -> 
     try:
         breakeven_spot = 65.0 + 5.0 + 12.0   # variable_cost + fixed_on_cost + premium (spot cuando floor=breakeven)
 
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
 
         # --- Izquierda: valor del proyecto ---
         ax1.plot(spots, npv_now,    marker="^", linestyle="--", color="steelblue",
@@ -148,9 +148,9 @@ def _plot_results(spots, npv_now, b_noswitch, b_full, inv_option, op_option) -> 
                  label="Valuación con NPV + Opción Inv. + Opción Op.")
         ax1.axhline(0, color="black", linewidth=0.7, linestyle=":")
         ax1.axvline(breakeven_spot, color="gray", linewidth=0.9, linestyle="--",
-                    label=f"Precio spot breakeven ({breakeven_spot:.0f})")
-        ax1.set_xlabel("Precio spot  $S_0$  (piso + prima)")
-        ax1.set_ylabel("Valor del proyecto  $V$")
+                    label=f"Precio spot breakeven ({breakeven_spot:.0f} \$/bbl)")
+        ax1.set_xlabel(r"Precio spot  $S_0$  (\$/bbl)")
+        ax1.set_ylabel(r"Valor del proyecto  $V$  (u.m.)")
         ax1.set_title("Valor del proyecto vs precio del petróleo")
         ax1.grid(True, linestyle="--", alpha=0.35)
         ax1.legend(fontsize=8)
@@ -162,9 +162,9 @@ def _plot_results(spots, npv_now, b_noswitch, b_full, inv_option, op_option) -> 
                  label="Opción Operacional")
         ax2.axhline(0, color="black", linewidth=0.7, linestyle=":")
         ax2.axvline(breakeven_spot, color="gray", linewidth=0.9, linestyle="--",
-                    label=f"Breakeven ({breakeven_spot:.0f})")
-        ax2.set_xlabel("Precio spot  $S_0$  (piso + prima)")
-        ax2.set_ylabel("Valor de la opción")
+                    label=f"Breakeven ({breakeven_spot:.0f} \$/bbl)")
+        ax2.set_xlabel(r"Precio spot  $S_0$  (\$/bbl)")
+        ax2.set_ylabel(r"Valor de la opción  (u.m.)")
         ax2.set_title("Valor de las opciones vs precio del petróleo")
         ax2.grid(True, linestyle="--", alpha=0.35)
         ax2.legend(fontsize=8)

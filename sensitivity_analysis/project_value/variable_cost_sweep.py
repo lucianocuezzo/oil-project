@@ -130,7 +130,7 @@ def _plot_results(vc_vals, npv_now, b_noswitch, b_full, inv_option, op_option) -
         # Breakeven operativo de largo plazo: floor - fixed_on_cost = 72 - 5 = 67
         breakeven_vc = 72.0 - _FIXED_ON_COST
 
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
 
         # --- Izquierda: valor del proyecto ---
         ax1.plot(vc_vals, npv_now,    marker="^", linestyle="--", color="steelblue",
@@ -141,9 +141,9 @@ def _plot_results(vc_vals, npv_now, b_noswitch, b_full, inv_option, op_option) -
                  label="Valuación con NPV + Opción Inv. + Opción Op.")
         ax1.axhline(0, color="black", linewidth=0.7, linestyle=":")
         ax1.axvline(breakeven_vc, color="gray", linewidth=0.9, linestyle="--",
-                    label=f"Breakeven largo plazo ({breakeven_vc:.0f})")
-        ax1.set_xlabel("Costo variable  $c_v$")
-        ax1.set_ylabel("Valor del proyecto  $V$")
+                    label=f"Breakeven largo plazo ({breakeven_vc:.0f} \$/bbl)")
+        ax1.set_xlabel(r"Costo variable  $c_v$  (\$/bbl)")
+        ax1.set_ylabel(r"Valor del proyecto  $V$  (u.m.)")
         ax1.set_title("Valor del proyecto vs costo variable")
         ax1.grid(True, linestyle="--", alpha=0.35)
         ax1.legend(fontsize=8)
@@ -155,9 +155,9 @@ def _plot_results(vc_vals, npv_now, b_noswitch, b_full, inv_option, op_option) -
                  label="Opción Operacional")
         ax2.axhline(0, color="black", linewidth=0.7, linestyle=":")
         ax2.axvline(breakeven_vc, color="gray", linewidth=0.9, linestyle="--",
-                    label=f"Breakeven largo plazo ({breakeven_vc:.0f})")
-        ax2.set_xlabel("Costo variable  $c_v$")
-        ax2.set_ylabel("Valor de la opción")
+                    label=f"Breakeven largo plazo ({breakeven_vc:.0f} \$/bbl)")
+        ax2.set_xlabel(r"Costo variable  $c_v$  (\$/bbl)")
+        ax2.set_ylabel(r"Valor de la opción  (u.m.)")
         ax2.set_title("Valor de las opciones vs costo variable")
         ax2.grid(True, linestyle="--", alpha=0.35)
         ax2.legend(fontsize=8)
