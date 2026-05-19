@@ -31,7 +31,7 @@ from optimal_path.policy_map import build_policy_map
 from optimal_path.policy_map_sigma import build_policy_map_sigma
 from optimal_path.value_heatmap import build_heatmap
 
-OUTPUT_DIR = pathlib.Path(r"C:\Users\lucia\OneDrive\Documentos\tesis\sensibilidades\optimal_path")
+OUTPUT_DIR = ROOT / "figures" / "optimal_path"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -47,101 +47,101 @@ def _save_new_figs(before: set, name: str) -> None:
         plt.close(fig)
 
 
-# ---------- umbral de inversión vs capex ----------
+# ── Figura 10.1 — Timing óptimo de inversión ──────────────────────────────────
 print("=" * 60)
-print("  Umbral de inversión vs capex")
-print("=" * 60)
-_before = set(plt.get_fignums())
-run_trigger_capex_sweep([5.0, 10.0, 15.0, 20.0, 30.0, 40.0, 50.0])
-_save_new_figs(_before, "trigger_capex_sweep")
-
-# ---------- umbral de inversión vs volatilidad ----------
-print()
-print("=" * 60)
-print("  Umbral de inversión vs volatilidad")
-print("=" * 60)
-_before = set(plt.get_fignums())
-run_trigger_sigma_sweep([0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.50])
-_save_new_figs(_before, "trigger_sigma_sweep")
-
-# ---------- umbral de inversión vs costo variable ----------
-print()
-print("=" * 60)
-print("  Umbral de inversión vs costo variable")
-print("=" * 60)
-_before = set(plt.get_fignums())
-run_trigger_variable_cost_sweep([45.0, 50.0, 55.0, 60.0, 65.0, 70.0, 75.0, 80.0])
-_save_new_figs(_before, "trigger_variable_cost_sweep")
-
-# ---------- umbral de inversión vs tasa de descuento ----------
-print()
-print("=" * 60)
-print("  Umbral de inversión vs tasa de descuento")
-print("=" * 60)
-_before = set(plt.get_fignums())
-run_trigger_discount_rate_sweep([0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.15, 0.20])
-_save_new_figs(_before, "trigger_discount_rate_sweep")
-
-# ---------- histéresis vs costo de switching ----------
-print("=" * 60)
-print("  Histéresis vs costo de switching")
-print("=" * 60)
-_before = set(plt.get_fignums())
-run_hysteresis_analysis([0.0, 1.0, 2.0, 5.0, 10.0, 15.0, 20.0])
-_save_new_figs(_before, "hysteresis_analysis")
-
-# ---------- volatilidad vs ancho de histéresis ----------
-print()
-print("=" * 60)
-print("  Volatilidad vs ancho de banda de histéresis")
-print("=" * 60)
-_before = set(plt.get_fignums())
-run_hysteresis_sigma_sweep([0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.50])
-_save_new_figs(_before, "hysteresis_sigma_sweep")
-
-# ---------- mapa de política — caso base ----------
-print("=" * 60)
-print("  Mapa de política — caso base (σ=0.20)")
-print("=" * 60)
-_before = set(plt.get_fignums())
-build_policy_map(sigma=0.2)
-_save_new_figs(_before, "policy_map_base")
-
-# ---------- mapa de política — grilla por σ ----------
-print()
-print("=" * 60)
-print("  Mapa de política — grilla por volatilidad")
-print("=" * 60)
-_before = set(plt.get_fignums())
-build_policy_map_sigma()
-_save_new_figs(_before, "policy_map_sigma")
-
-# ---------- mapa de calor de funciones de valor ----------
-print()
-print("=" * 60)
-print("  Mapa de calor de funciones de valor")
-print("=" * 60)
-_before = set(plt.get_fignums())
-build_heatmap()
-_save_new_figs(_before, "value_heatmap")
-
-# ---------- timing óptimo de inversión ----------
-print()
-print("=" * 60)
-print("  Timing óptimo de inversión")
+print("  Figura 10.1 — Timing óptimo de inversión")
 print("=" * 60)
 _before = set(plt.get_fignums())
 build_timing_plot(capex_list=[20.0, 60.0], n_paths=1000, seed=42)
-_save_new_figs(_before, "investment_timing")
+_save_new_figs(_before, "fig_10_1_timing_inversion")
 
-# ---------- simulación de caminos óptimos ----------
+# ── Figura 10.2 — Simulación de caminos óptimos ───────────────────────────────
 print()
 print("=" * 60)
-print("  Simulación de caminos óptimos")
+print("  Figura 10.2 — Simulación de caminos óptimos")
 print("=" * 60)
 _before = set(plt.get_fignums())
 build_optimal_paths(sigma=0.2, n_paths=8, seed=42)
-_save_new_figs(_before, "optimal_path_sim")
+_save_new_figs(_before, "fig_10_2_caminos_optimos")
+
+# ── Figura 10.3 — Funciones de valor de Bellman (mapas de calor) ──────────────
+print()
+print("=" * 60)
+print("  Figura 10.3 — Funciones de valor de Bellman (mapas de calor)")
+print("=" * 60)
+_before = set(plt.get_fignums())
+build_heatmap()
+_save_new_figs(_before, "fig_10_3_funciones_valor")
+
+# ── Figura 10.4 — Banda de histéresis vs costo de switching ───────────────────
+print()
+print("=" * 60)
+print("  Figura 10.4 — Banda de histéresis vs costo de switching")
+print("=" * 60)
+_before = set(plt.get_fignums())
+run_hysteresis_analysis([0.0, 1.0, 2.0, 5.0, 10.0, 15.0, 20.0])
+_save_new_figs(_before, "fig_10_4_histeresis_costo_switching")
+
+# ── Figura 10.5 — Banda de histéresis vs volatilidad ──────────────────────────
+print()
+print("=" * 60)
+print("  Figura 10.5 — Banda de histéresis vs volatilidad")
+print("=" * 60)
+_before = set(plt.get_fignums())
+run_hysteresis_sigma_sweep([0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.50])
+_save_new_figs(_before, "fig_10_5_histeresis_volatilidad")
+
+# ── Figura 10.6 — Umbral óptimo de inversión vs Capex ─────────────────────────
+print()
+print("=" * 60)
+print("  Figura 10.6 — Umbral óptimo de inversión vs Capex")
+print("=" * 60)
+_before = set(plt.get_fignums())
+run_trigger_capex_sweep([5.0, 10.0, 15.0, 20.0, 30.0, 40.0, 50.0])
+_save_new_figs(_before, "fig_10_6_umbral_capex")
+
+# ── Figura 10.7 — Umbral óptimo de inversión vs volatilidad ───────────────────
+print()
+print("=" * 60)
+print("  Figura 10.7 — Umbral óptimo de inversión vs volatilidad")
+print("=" * 60)
+_before = set(plt.get_fignums())
+run_trigger_sigma_sweep([0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.50])
+_save_new_figs(_before, "fig_10_7_umbral_volatilidad")
+
+# ── Figura 10.8 — Umbral óptimo de inversión vs costo variable ────────────────
+print()
+print("=" * 60)
+print("  Figura 10.8 — Umbral óptimo de inversión vs costo variable")
+print("=" * 60)
+_before = set(plt.get_fignums())
+run_trigger_variable_cost_sweep([45.0, 50.0, 55.0, 60.0, 65.0, 70.0, 75.0, 80.0])
+_save_new_figs(_before, "fig_10_8_umbral_costo_variable")
+
+# ── Extras (no numeradas en la tesis) ─────────────────────────────────────────
+print()
+print("=" * 60)
+print("  Extra — Umbral óptimo vs tasa de descuento")
+print("=" * 60)
+_before = set(plt.get_fignums())
+run_trigger_discount_rate_sweep([0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.15, 0.20])
+_save_new_figs(_before, "extra_umbral_tasa_descuento")
+
+print()
+print("=" * 60)
+print("  Extra — Mapa de política (caso base, σ=0.20)")
+print("=" * 60)
+_before = set(plt.get_fignums())
+build_policy_map(sigma=0.2)
+_save_new_figs(_before, "extra_mapa_politica_base")
+
+print()
+print("=" * 60)
+print("  Extra — Mapa de política, grilla por volatilidad")
+print("=" * 60)
+_before = set(plt.get_fignums())
+build_policy_map_sigma()
+_save_new_figs(_before, "extra_mapa_politica_sigma")
 
 print()
 print(f"Todas las figuras guardadas en:\n  {OUTPUT_DIR}")

@@ -1,10 +1,13 @@
 """
 Figuras del Capítulo 9 — Implementación numérica y caso base.
 
-Genera tres figuras:
-  fig9_1_arbol_calibrado.png  — Fan de precios del árbol trinomial calibrado
-  fig9_2_valor_caso_base.png  — Waterfall de descomposición del valor
-  fig9_3_mapa_politica.png    — Mapa de política óptima (caso base)
+Genera las figuras numeradas en la tesis:
+  fig_9_1_distribucion_precios.png  — Distribución de precios del árbol trinomial
+  fig_9_2_mapa_politica.png         — Mapa de política óptima (caso base)
+  fig_9_3_valor_caso_base.png       — Descomposición del valor del proyecto
+
+Y además una figura extra no incluida en la tesis:
+  extra_arbol_min_max.png           — Árbol calibrado, versión min/max
 
 Ejecutar desde la raíz del repositorio:
     python chapter9/caso_base_figures.py
@@ -33,7 +36,7 @@ from tree.oil_futures_curve import FuturesCurve
 from tree.oil_tree_builder import OilTrinomialTreeBuilder
 from tree.oil_tree_calibrator import OilTrinomialFuturesCalibrator
 
-OUTPUT_DIR = pathlib.Path(r"C:\Users\lucia\OneDrive\Documentos\tesis\sensibilidades\chapter9")
+OUTPUT_DIR = ROOT / "figures" / "chapter9"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── Parámetros base ────────────────────────────────────────────────────────────
@@ -252,29 +255,33 @@ if __name__ == "__main__":
     print("Construyendo árbol y resolviendo Bellman (caso base)...")
     tree, sol = _build_tree_and_solve()
 
-    print("\n── Figura 9.1: árbol calibrado (versión original: min/max)")
-    f1 = fig_arbol(tree)
-    f1.savefig(OUTPUT_DIR / "fig9_1_arbol_calibrado.png", dpi=300, bbox_inches="tight")
-    print(f"  → {OUTPUT_DIR / 'fig9_1_arbol_calibrado.png'}")
+    print("\n── Figura 9.1: distribución de precios del petróleo")
+    f1 = fig_arbol_percentiles()
+    out = OUTPUT_DIR / "fig_9_1_distribucion_precios.png"
+    f1.savefig(out, dpi=300, bbox_inches="tight")
+    print(f"  → {out}")
 
-    print("\n── Figura 9.1b: árbol calibrado (versión A: bandas percentiles)")
-    f1b = fig_arbol_percentiles()
-    f1b.savefig(OUTPUT_DIR / "fig9_1b_arbol_percentiles.png", dpi=300, bbox_inches="tight")
-    print(f"  → {OUTPUT_DIR / 'fig9_1b_arbol_percentiles.png'}")
-
-    print("\n── Figura 9.2: waterfall del valor")
-    f2 = fig_waterfall(tree, sol)
-    f2.savefig(OUTPUT_DIR / "fig9_2_valor_caso_base.png", dpi=300, bbox_inches="tight")
-    print(f"  → {OUTPUT_DIR / 'fig9_2_valor_caso_base.png'}")
-
-    print("\n── Figura 9.3: mapa de política (puede tardar ~30 s)")
+    print("\n── Figura 9.2: mapa de política óptima (puede tardar ~30 s)")
     _before = set(plt.get_fignums())
     build_policy_map(sigma=SIGMA)
     new = sorted(set(plt.get_fignums()) - _before)
     if new:
-        fig3 = plt.figure(new[0])
-        fig3.savefig(OUTPUT_DIR / "fig9_3_mapa_politica.png", dpi=300, bbox_inches="tight")
-        print(f"  → {OUTPUT_DIR / 'fig9_3_mapa_politica.png'}")
+        fig2 = plt.figure(new[0])
+        out = OUTPUT_DIR / "fig_9_2_mapa_politica.png"
+        fig2.savefig(out, dpi=300, bbox_inches="tight")
+        print(f"  → {out}")
+
+    print("\n── Figura 9.3: descomposición del valor del proyecto")
+    f3 = fig_waterfall(tree, sol)
+    out = OUTPUT_DIR / "fig_9_3_valor_caso_base.png"
+    f3.savefig(out, dpi=300, bbox_inches="tight")
+    print(f"  → {out}")
+
+    print("\n── Extra: árbol calibrado (versión min/max, no numerada en la tesis)")
+    f_extra = fig_arbol(tree)
+    out = OUTPUT_DIR / "extra_arbol_min_max.png"
+    f_extra.savefig(out, dpi=300, bbox_inches="tight")
+    print(f"  → {out}")
 
     print(f"\nTodas las figuras guardadas en:\n  {OUTPUT_DIR}")
     plt.show()

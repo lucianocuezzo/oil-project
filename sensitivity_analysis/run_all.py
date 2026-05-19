@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from optimal_path.hysteresis_analysis import run_hysteresis_analysis
 from optimal_path.trigger_capex_sweep import run_trigger_capex_sweep
 
-OUTPUT_DIR = pathlib.Path(r"C:\Users\lucia\OneDrive\Documentos\tesis\sensibilidades")
+OUTPUT_DIR = ROOT / "figures"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
